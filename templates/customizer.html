@@ -1,0 +1,288 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PrintCraft — Product Customizer</title>
+  <meta name="description" content="Upload your design and see it realistically rendered onto premium products. Instant fabric-aware mockups powered by computer vision." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="{% static 'css/customizer.css' %}" />
+</head>
+<body>
+
+<!-- ── HEADER ── -->
+<header class="header" id="site-header">
+  <div class="header-inner">
+    <div class="logo">
+      <svg class="logo-icon" viewBox="0 0 28 28" fill="none" aria-hidden="true">
+        <rect width="28" height="28" rx="6" fill="#e63030"/>
+        <path d="M6 8h16M6 14h11M6 20h7" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+        <circle cx="21" cy="20" r="3.5" fill="#fff" opacity="0.95"/>
+      </svg>
+      <span class="logo-text">PrintCraft</span>
+    </div>
+    <nav class="nav" aria-label="Site navigation">
+      <a href="#products-section" class="nav-link">Products</a>
+      <a href="#customizer-section" class="nav-link">Customizer</a>
+      <a href="#how-section" class="nav-link">How It Works</a>
+      <a href="/admin/" class="nav-link nav-link-admin" target="_blank">Admin ↗</a>
+    </nav>
+  </div>
+</header>
+
+<!-- ── HERO ── -->
+<section class="hero" aria-label="Hero">
+  <!-- Right-side cinematic product image -->
+  <div class="hero-visual">
+    <img src="{% static 'img/hero_shirt.png' %}" alt="Premium fabric product" />
+  </div>
+
+  <!-- Left-side editorial copy -->
+  <div class="hero-left">
+    <div class="hero-badge">AI-Powered Fabric Rendering</div>
+
+    <h1 class="hero-title">
+      Your Design,<br />
+      <span class="hero-title-accent">Perfectly</span><br />
+      <span class="hero-title-white">Printed.</span>
+    </h1>
+
+    <p class="hero-subtitle">
+      Upload any artwork and watch it wrap realistically around fabric folds,
+      follow the product curve, and blend with real lighting — in seconds.
+    </p>
+
+    <div class="hero-cta-group">
+      <a href="#customizer-section" class="btn btn-primary" id="hero-cta-start">
+        Start Customizing
+        <svg viewBox="0 0 20 20" fill="currentColor" width="16" height="16" aria-hidden="true">
+          <path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd"/>
+        </svg>
+      </a>
+      <a href="/admin/products/product/add/" class="btn btn-ghost" target="_blank">Add Product</a>
+    </div>
+
+    <div class="hero-stats">
+      <div class="stat">
+        <span class="stat-num">7-Step</span>
+        <span class="stat-label">Render Pipeline</span>
+      </div>
+      <div class="stat-divider"></div>
+      <div class="stat">
+        <span class="stat-num">&lt;200ms</span>
+        <span class="stat-label">Render Speed</span>
+      </div>
+      <div class="stat-divider"></div>
+      <div class="stat">
+        <span class="stat-num">100%</span>
+        <span class="stat-label">Fabric-Aware</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── MAIN CUSTOMIZER ── -->
+<main id="customizer-section" class="customizer-section">
+
+  <!-- Products Panel -->
+  <section id="products-section" class="panel panel-products" aria-label="Product selection">
+    <header class="panel-header">
+      <h2 class="panel-title">Choose a Product</h2>
+      <p class="panel-subtitle">Select what you want to customize</p>
+    </header>
+    <div class="product-grid" id="product-grid" role="list" aria-label="Product list">
+      <div class="skeleton-grid">
+        <div class="skeleton-card"></div>
+        <div class="skeleton-card"></div>
+        <div class="skeleton-card"></div>
+        <div class="skeleton-card"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- View Switcher + Canvas -->
+  <section class="panel panel-canvas" aria-label="Product customizer canvas">
+    <div class="canvas-toolbar" id="canvas-toolbar" style="display:none;">
+      <div class="view-tabs" id="view-tabs" role="tablist" aria-label="Product views"></div>
+      <div class="canvas-toolbar-right">
+        <div class="opacity-control">
+          <label for="opacity-slider" class="opacity-label">Opacity</label>
+          <input type="range" id="opacity-slider" min="10" max="100" value="100" class="range-slider" aria-label="Design opacity" />
+          <span class="opacity-value" id="opacity-value">100%</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="canvas-area" id="canvas-area">
+      <!-- Empty state -->
+      <div class="canvas-empty" id="canvas-empty">
+        <div class="canvas-empty-icon">
+          <svg viewBox="0 0 64 64" fill="none" aria-hidden="true">
+            <rect x="8" y="8" width="48" height="48" rx="10" stroke="currentColor" stroke-width="1.5" stroke-dasharray="4 4"/>
+            <path d="M32 22v20M22 32h20" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <p class="canvas-empty-text">Select a product to begin</p>
+      </div>
+
+      <!-- Product preview -->
+      <div class="product-preview" id="product-preview" style="display:none;" role="img" aria-label="Product preview">
+        <div class="preview-image-wrap">
+          <img id="preview-base-image" class="preview-base" alt="Product base image" />
+          <div class="print-area-overlay" id="print-area-overlay" title="Print area"></div>
+        </div>
+        <div class="render-overlay" id="render-overlay" style="display:none;">
+          <img id="render-result-image" class="render-result" alt="Rendered design" />
+        </div>
+      </div>
+    </div>
+
+    <!-- Render status bar -->
+    <div class="status-bar" id="status-bar" style="display:none;" role="status" aria-live="polite">
+      <div class="status-bar-inner">
+        <span class="status-dot" id="status-dot"></span>
+        <span class="status-text" id="status-text">Rendering…</span>
+        <div class="progress-track">
+          <div class="progress-fill" id="progress-fill"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Upload + Controls -->
+  <section class="panel panel-upload" aria-label="Design upload and controls">
+    <header class="panel-header">
+      <h2 class="panel-title">Upload Your Design</h2>
+      <p class="panel-subtitle">PNG, JPG or SVG · up to 10 MB</p>
+    </header>
+
+    <!-- Step guide -->
+    <div class="steps-guide" id="steps-guide">
+      <div class="step-pill step-done" id="step1-pill">
+        <span class="step-pill-num">1</span>
+        <span class="step-pill-label">Product</span>
+      </div>
+      <div class="step-pill" id="step2-pill">
+        <span class="step-pill-num">2</span>
+        <span class="step-pill-label">Upload</span>
+      </div>
+      <div class="step-pill" id="step3-pill">
+        <span class="step-pill-num">3</span>
+        <span class="step-pill-label">Render</span>
+      </div>
+    </div>
+
+    <!-- Drop zone -->
+    <div class="dropzone" id="dropzone" role="button" tabindex="0" aria-label="Upload design — click or drag and drop">
+      <div class="dropzone-inner" id="dropzone-inner">
+        <div class="dropzone-icon" id="dropzone-icon">
+          <svg viewBox="0 0 64 64" fill="none" aria-hidden="true">
+            <circle cx="32" cy="32" r="27" stroke="currentColor" stroke-width="1.5"/>
+            <path d="M32 20v16M24 28l8-8 8 8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M20 44h24" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <p class="dropzone-title">Drop your design here</p>
+        <p class="dropzone-sub">or <span class="dropzone-browse">browse files</span></p>
+        <p class="dropzone-formats">PNG, JPG, SVG (max 10 MB)</p>
+        <img id="design-preview-thumb" class="design-thumb" alt="Design preview" style="display:none;" />
+      </div>
+      <input type="file" id="design-file-input" accept="image/*" class="sr-only" aria-label="Select design file" />
+    </div>
+
+    <!-- Action buttons -->
+    <div class="action-buttons">
+      <button class="btn btn-primary btn-full" id="btn-render-all" disabled aria-label="Apply design to all product views">
+        <svg class="btn-icon" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M5 3a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2V5a2 2 0 00-2-2H5zM5 11a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2v-2a2 2 0 00-2-2H5zM11 5a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V5zM14 11a1 1 0 011 1v1h1a1 1 0 110 2h-1v1a1 1 0 11-2 0v-1h-1a1 1 0 110-2h1v-1a1 1 0 011-1z"/></svg>
+        Apply to All Views
+      </button>
+      <button class="btn btn-secondary btn-full" id="btn-render-current" disabled aria-label="Apply design to current product view">
+        Apply to Current View
+      </button>
+      <p class="btn-hint" id="btn-hint" style="display:none;">Upload a design above to enable rendering</p>
+    </div>
+
+    <!-- Download area -->
+    <div class="download-area" id="download-area" style="display:none;">
+      <div class="download-card">
+        <div class="download-card-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <div class="download-card-body">
+          <p class="download-card-title">Render Ready</p>
+          <p class="download-card-sub" id="download-card-sub">Current view</p>
+        </div>
+        <a href="#" class="btn btn-download" id="btn-download" download="printcraft_render.jpg">Download</a>
+      </div>
+    </div>
+
+    <!-- All-views results -->
+    <div class="all-results" id="all-results" style="display:none;">
+      <h3 class="all-results-title">All View Renders</h3>
+      <div class="all-results-grid" id="all-results-grid"></div>
+    </div>
+  </section>
+
+</main>
+
+<!-- ── HOW IT WORKS ── -->
+<section class="how-section" id="how-section" aria-label="How it works">
+  <div class="how-inner">
+    <div class="how-label">The Technology</div>
+    <h2 class="how-title">How the Rendering Works</h2>
+    <div class="how-steps">
+      <div class="how-step">
+        <div class="how-step-num">01</div>
+        <h3 class="how-step-title">Analysis</h3>
+        <p class="how-step-desc">Canny edge detection and Hough transforms measure surface tilt. Difference-of-Gaussians extracts a luminance displacement map from fabric wrinkles.</p>
+      </div>
+      <div class="how-step">
+        <div class="how-step-num">02</div>
+        <h3 class="how-step-title">Perspective Warp</h3>
+        <p class="how-step-desc">A 3×3 homography matrix — computed from the print area and detected tilt — transforms the design to match the product's surface angle exactly.</p>
+      </div>
+      <div class="how-step">
+        <div class="how-step-num">03</div>
+        <h3 class="how-step-title">Fabric Conformation</h3>
+        <p class="how-step-desc">Each design pixel is displaced using cv2.remap() with the fabric's displacement map, making it flow naturally around every wrinkle and fold.</p>
+      </div>
+      <div class="how-step">
+        <div class="how-step-num">04</div>
+        <h3 class="how-step-title">Realistic Blending</h3>
+        <p class="how-step-desc">Multiply blend passes fabric texture through the design. A soft-light luminance pass re-integrates the product's natural lighting so it looks truly printed.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── FOOTER ── -->
+<footer class="footer" role="contentinfo">
+  <div class="footer-inner">
+    <div class="logo">
+      <svg class="logo-icon" viewBox="0 0 28 28" fill="none" aria-hidden="true">
+        <rect width="28" height="28" rx="6" fill="#e63030"/>
+        <path d="M6 8h16M6 14h11M6 20h7" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+        <circle cx="21" cy="20" r="3.5" fill="#fff" opacity="0.95"/>
+      </svg>
+      <span class="logo-text">PrintCraft</span>
+    </div>
+    <div class="footer-tech">
+      <span class="tech-tag">Django</span>
+      <span class="tech-tag">Celery</span>
+      <span class="tech-tag">OpenCV</span>
+      <span class="tech-tag">NumPy</span>
+      <span class="tech-tag">Pillow</span>
+      <span class="tech-tag">Redis</span>
+    </div>
+    <p class="footer-copy">Fabric-aware product rendering engine</p>
+  </div>
+</footer>
+
+<script src="{% static 'js/customizer.js' %}?v={% now 'U' %}"></script>
+</body>
+</html>
