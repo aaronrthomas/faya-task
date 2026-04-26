@@ -26,6 +26,25 @@ function getCsrfToken() {
   return match ? match[1] : '';
 }
 
+/**
+ * Safely parse a fetch Response as JSON.
+ * Throws a clear error when the server returns HTML instead of JSON
+ * (e.g. Django 404/500 pages in production).
+ */
+async function safeJson(res) {
+  const text = await res.text();
+  try {
+    return JSON.parse(text);
+  } catch (_) {
+    // Server returned HTML (e.g. "<!DOCTYPE …") — build descriptive error
+    const preview = text.substring(0, 120).replace(/\s+/g, ' ').trim();
+    throw new Error(
+      `Server returned ${res.status} (non-JSON). ` +
+      `Check server logs. Response: "${preview}…"`
+    );
+  }
+}
+
 // ─────────────────────────────────────────────
 // State
 // ─────────────────────────────────────────────
@@ -114,7 +133,7 @@ async function loadProducts() {
   try {
     const res = await fetch(`${API_BASE}/products/`);
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    state.products = await res.json();
+    state.products = await safeJson(res);
     renderProductGrid();
   } catch (err) {
     productGrid.innerHTML = `<p style="color:var(--c-danger);padding:1rem;font-size:.85rem;">
@@ -367,7 +386,7 @@ async function renderCurrentView() {
       headers: { 'X-CSRFToken': getCsrfToken() },
       body: formData,
     });
-    const data = await res.json();
+    const data = await safeJson(res);
 
     // If the user switched views while the request was in-flight, discard silently
     if (state.selectedView?.id !== targetViewId) return;
@@ -430,7 +449,7 @@ async function renderAllViews() {
       headers: { 'X-CSRFToken': getCsrfToken() },
       body: formData,
     });
-    const data = await res.json();
+    const data = await safeJson(res);
 
     if (state.selectedProduct?.id !== targetProduct.id) return;
 
@@ -456,7 +475,7 @@ async function renderAllViews() {
         }
         try {
           const jRes  = await fetch(`${API_BASE}/render/${job_id}/status/`);
-          const jData = await jRes.json();
+          const jData = await safeJson(jRes);
 
           if (jData.status === 'done') {
             clearInterval(intervalId);
@@ -511,7 +530,7 @@ function pollJobStatus(jobId, targetViewId, targetViewLabel) {
     }
     try {
       const res  = await fetch(`${API_BASE}/render/${jobId}/status/`);
-      const data = await res.json();
+      const data = await safeJson(res);
 
       if (data.status === 'done') {
         clearInterval(intervalId);
