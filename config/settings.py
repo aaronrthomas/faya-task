@@ -110,6 +110,14 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 # CORS — allow all origins so the JS frontend can call /api/ in both dev and production
 CORS_ALLOW_ALL_ORIGINS = True
 
+# CSRF trusted origins — Django 4.2+ requires this for POST requests
+CSRF_TRUSTED_ORIGINS = [
+    "https://faya-task.vercel.app",
+    "https://*.vercel.app",
+    "http://localhost:8001",
+    "http://127.0.0.1:8001",
+]
+
 # Django REST Framework
 REST_FRAMEWORK = {
     "DEFAULT_RENDERER_CLASSES": [
