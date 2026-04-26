@@ -9,6 +9,8 @@ numpy>=2.0.0
 scipy>=1.13.0
 django-storages==1.14.2
 python-dotenv==1.0.1
+whitenoise==6.7.0
+gunicorn==22.0.0
 # psycopg2-binary requires MSVC build tools on Windows.
 # For PostgreSQL support, install it separately or use Linux/WSL.
 # For development, SQLite is used by default.
