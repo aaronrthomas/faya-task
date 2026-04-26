@@ -19,6 +19,9 @@ ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "*").split(",")
 # API base URL — passed to the frontend template so JS knows where to call
 API_BASE_URL = os.getenv("API_BASE_URL", "/api")
 
+# Detect serverless environments (Vercel sets VERCEL=1 automatically)
+IS_SERVERLESS = os.getenv("VERCEL") or os.getenv("IS_SERVERLESS", "false").lower() == "true"
+
 INSTALLED_APPS = [
     "django.contrib.admin",
     "django.contrib.auth",
@@ -67,10 +70,12 @@ TEMPLATES = [
 WSGI_APPLICATION = "config.wsgi.application"
 
 # Database — SQLite for development, easily switchable to PostgreSQL
+# On Vercel/serverless the project dir is read-only, so use /tmp for SQLite.
+_default_db_path = "/tmp/db.sqlite3" if IS_SERVERLESS else str(BASE_DIR / "db.sqlite3")
 DATABASES = {
     "default": {
         "ENGINE": os.getenv("DB_ENGINE") or "django.db.backends.sqlite3",
-        "NAME": os.getenv("DB_NAME") or str(BASE_DIR / "db.sqlite3"),
+        "NAME": os.getenv("DB_NAME") or _default_db_path,
         "USER": os.getenv("DB_USER") or "",
         "PASSWORD": os.getenv("DB_PASSWORD") or "",
         "HOST": os.getenv("DB_HOST") or "",
@@ -97,7 +102,8 @@ STATIC_ROOT = BASE_DIR / "staticfiles"
 STATICFILES_STORAGE = "whitenoise.storage.CompressedStaticFilesStorage"
 
 MEDIA_URL = "/media/"
-MEDIA_ROOT = BASE_DIR / "media"
+# On Vercel/serverless the project dir is read-only — use /tmp for uploads and renders
+MEDIA_ROOT = Path("/tmp/media") if IS_SERVERLESS else BASE_DIR / "media"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 

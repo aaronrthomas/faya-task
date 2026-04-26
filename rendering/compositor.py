@@ -27,6 +27,39 @@ DISP_SCALE = RENDERING_CFG.get("DISPLACEMENT_SCALE", 14)
 LIGHTING_ALPHA = RENDERING_CFG.get("LIGHTING_BLEND_ALPHA", 0.38)
 PREVIEW_SCALE = RENDERING_CFG.get("PREVIEW_SCALE", 0.5)
 
+# Project-level media directory (where product images ship with the codebase)
+_PROJECT_MEDIA = Path(settings.BASE_DIR) / "media"
+
+
+def _resolve_media_path(field_path: str) -> str:
+    """
+    Resolve a Django FileField .path to an actual readable file.
+
+    On Vercel/serverless, MEDIA_ROOT is /tmp/media (writable but empty on cold
+    start).  Product base images and displacement maps actually live in the
+    project's media/ directory.  This helper checks MEDIA_ROOT first, then
+    falls back to the in-project media directory.
+    """
+    p = Path(field_path)
+    if p.is_file():
+        return str(p)
+
+    # Try the project's bundled media directory instead
+    # field_path is usually <MEDIA_ROOT>/<relative>, so strip the MEDIA_ROOT prefix
+    try:
+        rel = p.relative_to(settings.MEDIA_ROOT)
+    except ValueError:
+        # Not under MEDIA_ROOT — just return as-is
+        return str(p)
+
+    fallback = _PROJECT_MEDIA / rel
+    if fallback.is_file():
+        logger.debug("Resolved media fallback: %s → %s", p, fallback)
+        return str(fallback)
+
+    # Neither location has the file — return the original and let the caller error
+    return str(p)
+
 
 # ──────────────────────────────────────────────
 # Public entry point
@@ -49,7 +82,7 @@ def render(product_view, design_path: str, output_path: str, opacity: float = 1.
         RuntimeError on any unrecoverable error.
     """
     # 1. Load images
-    base_bgr = _load_bgr(product_view.base_image.path)
+    base_bgr = _load_bgr(_resolve_media_path(product_view.base_image.path))
     design_rgba = _load_rgba(design_path)
 
     H_base, W_base = base_bgr.shape[:2]
@@ -64,7 +97,7 @@ def render(product_view, design_path: str, output_path: str, opacity: float = 1.
 
     # 4. Displacement warp (fabric conformation)
     if product_view.displacement_map:
-        disp_map = _load_gray(product_view.displacement_map.path)
+        disp_map = _load_gray(_resolve_media_path(product_view.displacement_map.path))
     else:
         disp_map = None
 
@@ -102,7 +135,7 @@ def render_preview(product_view, design_path: str, output_path: str, opacity: fl
     Synchronous fast preview at PREVIEW_SCALE resolution.
     Skips displacement warp for speed.
     """
-    base_bgr = _load_bgr(product_view.base_image.path)
+    base_bgr = _load_bgr(_resolve_media_path(product_view.base_image.path))
     design_rgba = _load_rgba(design_path)
 
     H_base, W_base = base_bgr.shape[:2]

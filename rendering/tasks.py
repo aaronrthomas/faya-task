@@ -115,7 +115,8 @@ def render_product_view(self, job_id: str):
                 "Cannot render until analysis is complete."
             )
 
-        design_path = job.design_image.path
+        from rendering.compositor import _resolve_media_path
+        design_path = _resolve_media_path(job.design_image.path)
 
         # Build unique output path
         output_filename = f"result_{job.pk}_{uuid.uuid4().hex[:8]}.jpg"

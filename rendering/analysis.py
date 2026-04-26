@@ -31,7 +31,8 @@ def analyze_view(product_view) -> dict:
     Returns a dict with keys: surface_angle_deg, perspective_matrix, displacement_map_path.
     The caller (Celery task) is responsible for saving results back to the model.
     """
-    image_path = product_view.base_image.path
+    from rendering.compositor import _resolve_media_path
+    image_path = _resolve_media_path(product_view.base_image.path)
     image = _load_image(image_path)
     if image is None:
         raise ValueError(f"Cannot load image: {image_path}")
