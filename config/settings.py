@@ -14,7 +14,10 @@ SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", "dev-secret-key-change-in-production
 
 DEBUG = os.getenv("DEBUG", "True") == "True"
 
-ALLOWED_HOSTS = ["*"]
+ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "*").split(",")
+
+# API base URL — passed to the frontend template so JS knows where to call
+API_BASE_URL = os.getenv("API_BASE_URL", "/api")
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -66,12 +69,12 @@ WSGI_APPLICATION = "config.wsgi.application"
 # Database — SQLite for development, easily switchable to PostgreSQL
 DATABASES = {
     "default": {
-        "ENGINE": os.getenv("DB_ENGINE", "django.db.backends.sqlite3"),
-        "NAME": os.getenv("DB_NAME", str(BASE_DIR / "db.sqlite3")),
-        "USER": os.getenv("DB_USER", ""),
-        "PASSWORD": os.getenv("DB_PASSWORD", ""),
-        "HOST": os.getenv("DB_HOST", ""),
-        "PORT": os.getenv("DB_PORT", ""),
+        "ENGINE": os.getenv("DB_ENGINE") or "django.db.backends.sqlite3",
+        "NAME": os.getenv("DB_NAME") or str(BASE_DIR / "db.sqlite3"),
+        "USER": os.getenv("DB_USER") or "",
+        "PASSWORD": os.getenv("DB_PASSWORD") or "",
+        "HOST": os.getenv("DB_HOST") or "",
+        "PORT": os.getenv("DB_PORT") or "",
     }
 }
 

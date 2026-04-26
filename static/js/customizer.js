@@ -13,7 +13,7 @@
 // ─────────────────────────────────────────────
 // Config
 // ─────────────────────────────────────────────
-const API_BASE = '/api';
+const API_BASE = window.__API_BASE__ || '/api';
 const POLL_INTERVAL_MS = 800;
 const CATEGORY_EMOJIS = {
   tshirt: '👕', hoodie: '🧥', cap: '🧢',

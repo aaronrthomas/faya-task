@@ -283,6 +283,10 @@
   </div>
 </footer>
 
+<script>
+  // API base URL — configured via .env → Django settings → template context
+  window.__API_BASE__ = "{{ api_base_url }}";
+</script>
 <script src="{% static 'js/customizer.js' %}?v={% now 'U' %}"></script>
 </body>
 </html>
