@@ -42,10 +42,16 @@ def custom_exception_handler(exc, context):
 
     # Anything else is an unexpected server error — log it and return 500 JSON
     import logging
+    import traceback
+    from django.conf import settings
+
     logger = logging.getLogger("django.request")
     logger.error("Unhandled API exception: %s", exc, exc_info=True)
 
-    return Response(
-        {"error": "Internal server error."},
-        status=status.HTTP_500_INTERNAL_SERVER_ERROR,
-    )
+    body = {"error": "Internal server error."}
+    if settings.DEBUG:
+        # Include the traceback in development so the error shows in the browser
+        body["detail"] = str(exc)
+        body["traceback"] = traceback.format_exception(type(exc), exc, exc.__traceback__)
+
+    return Response(body, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
